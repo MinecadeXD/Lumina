@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { defaults } from './defaults.ts';
+import { defaults, logLevels } from './defaults.ts';
 import { ConfigurationError } from '../utils/errors.ts';
 
 export interface EnvironmentConfig {
@@ -24,9 +24,9 @@ export function loadEnvironment(): EnvironmentConfig {
   const nodeEnv = process.env.NODE_ENV?.trim() || defaults.nodeEnv;
   const rawLogLevel = process.env.LOG_LEVEL?.trim() || defaults.logLevel;
 
-  if (!defaults.logLevels.includes(rawLogLevel as (typeof defaults.logLevels)[number])) {
+  if (!logLevels.includes(rawLogLevel as (typeof defaults.logLevels)[number])) {
     throw new ConfigurationError(
-      `Invalid LOG_LEVEL "${rawLogLevel}". Expected one of: ${defaults.logLevels.join(', ')}`,
+      `Invalid LOG_LEVEL "${rawLogLevel}". Expected one of: ${logLevels.join(', ')}`,
     );
   }
 
