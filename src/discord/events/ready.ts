@@ -1,5 +1,5 @@
 import type { Client } from 'discord.js';
-import { logger } from '../../logging/logger.js';
+import { logger } from '../../logging/logger.ts';
 
 export function registerReadyEvent(client: Client): void {
   client.once('ready', (readyClient) => {
