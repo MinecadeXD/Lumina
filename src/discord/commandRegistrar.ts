@@ -1,7 +1,7 @@
 import { REST, Routes } from 'discord.js';
-import type { Command } from './commands/types.js';
-import type { EnvironmentConfig } from '../config/environment.js';
-import { logger } from '../logging/logger.js';
+import type { Command } from './commands/types.ts';
+import type { EnvironmentConfig } from '../config/environment.ts';
+import { logger } from '../logging/logger.ts';
 
 export async function registerCommands(
   environment: EnvironmentConfig,
