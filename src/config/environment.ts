@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import { defaults } from './defaults.js';
-import { ConfigurationError } from '../utils/errors.js';
+import { defaults } from './defaults.ts';
+import { ConfigurationError } from '../utils/errors.ts';
 
 export interface EnvironmentConfig {
   nodeEnv: string;
