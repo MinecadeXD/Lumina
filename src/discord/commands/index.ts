@@ -1,5 +1,5 @@
-import type { Command } from './types.js';
-import { askCommand } from './ask.js';
+import type { Command } from './types.ts';
+import { askCommand } from './ask.ts';
 
 export function loadCommands(): readonly Command[] {
   return [askCommand];
