@@ -6,7 +6,6 @@ import { logger } from './logging/logger.ts';
 
 async function main(): Promise<void> {
   const environment = loadEnvironment();
-  logger.configure(environment.logLevel);
 
   const database = createDatabase();
   const client = createDiscordClient();
