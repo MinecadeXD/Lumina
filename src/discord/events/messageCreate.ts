@@ -1,5 +1,5 @@
 import type { Client, Message } from 'discord.js';
-import { logger } from '../../logging/logger.js';
+import { logger } from '../../logging/logger.ts';
 
 export function registerMessageCreateEvent(client: Client): void {
   client.on('messageCreate', (message: Message) => {
