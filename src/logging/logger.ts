@@ -1,4 +1,4 @@
-import type { LogLevel } from "../config/defaults.js";
+import type { LogLevel } from "../config/defaults.ts";
 
 const levelPriority: Record<LogLevel, number> = {
   debug: 10,
