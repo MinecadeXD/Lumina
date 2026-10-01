@@ -1,5 +1,5 @@
 export class AppError extends Error {
-  public readonly cause?: unknown;
+  public readonly cause: unknown;
 
   public constructor(message: string, cause?: unknown) {
     super(message, { cause });
