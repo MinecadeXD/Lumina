@@ -1,3 +1,4 @@
+import { createDatabase, closeDatabase } from './database/index.ts';
 import { createDiscordClient } from './discord/client.ts';
 import { initializeDiscord, registerDiscordEvents } from './discord/index.ts';
 import { loadEnvironment } from './config/environment.ts';
@@ -7,12 +8,24 @@ async function main(): Promise<void> {
   const environment = loadEnvironment();
   logger.configure(environment.logLevel);
 
+  const database = createDatabase();
   const client = createDiscordClient();
   registerDiscordEvents(client);
 
+  let shuttingDown = false;
+
   const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+
     logger.info(`Received ${signal}; shutting down Lumina.`);
-    client.destroy();
+
+    try {
+      client.destroy();
+    } finally {
+      closeDatabase(database);
+    }
+
     logger.info('Lumina shutdown complete.');
   };
 
@@ -24,7 +37,13 @@ async function main(): Promise<void> {
     await client.login(environment.discordToken);
   } catch (error) {
     logger.fatal(error);
-    client.destroy();
+
+    try {
+      client.destroy();
+    } finally {
+      closeDatabase(database);
+    }
+
     process.exitCode = 1;
   }
 }
