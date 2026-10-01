@@ -1,16 +1,13 @@
-export class LuminaError extends Error {
-  readonly code: string;
+export class AppError extends Error {
+  public readonly cause?: unknown;
 
-  constructor(message: string, code = "LUMINA_ERROR") {
-    super(message);
-    this.name = "LuminaError";
-    this.code = code;
+  public constructor(message: string, cause?: unknown) {
+    super(message, { cause });
+    this.name = new.target.name;
+    this.cause = cause;
   }
 }
 
-export class ConfigurationError extends LuminaError {
-  constructor(message: string) {
-    super(message, "CONFIGURATION_ERROR");
-    this.name = "ConfigurationError";
-  }
-}
+export class ConfigurationError extends AppError {}
+
+export class DatabaseError extends AppError {}
