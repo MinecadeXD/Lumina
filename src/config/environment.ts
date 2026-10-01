@@ -1,10 +1,10 @@
 import 'dotenv/config';
-import { defaults, logLevels } from './defaults.ts';
+import { defaults, logLevels, type LogLevel } from './defaults.ts';
 import { ConfigurationError } from '../utils/errors.ts';
 
 export interface EnvironmentConfig {
   nodeEnv: string;
-  logLevel: (typeof defaults.logLevels)[number];
+  logLevel: LogLevel;
   discordToken: string;
   discordClientId: string;
   discordGuildId?: string;
@@ -24,7 +24,7 @@ export function loadEnvironment(): EnvironmentConfig {
   const nodeEnv = process.env.NODE_ENV?.trim() || defaults.nodeEnv;
   const rawLogLevel = process.env.LOG_LEVEL?.trim() || defaults.logLevel;
 
-  if (!logLevels.includes(rawLogLevel as (typeof defaults.logLevels)[number])) {
+  if (!logLevels.includes(rawLogLevel as LogLevel)) {
     throw new ConfigurationError(
       `Invalid LOG_LEVEL "${rawLogLevel}". Expected one of: ${logLevels.join(', ')}`,
     );
@@ -32,13 +32,18 @@ export function loadEnvironment(): EnvironmentConfig {
 
   const discordToken = requireValue('DISCORD_TOKEN');
   const discordClientId = requireValue('DISCORD_CLIENT_ID');
-  const discordGuildId = process.env.DISCORD_GUILD_ID?.trim() || undefined;
+  const discordGuildId = process.env.DISCORD_GUILD_ID?.trim();
 
-  return {
+  const environment: EnvironmentConfig = {
     nodeEnv,
-    logLevel: rawLogLevel as (typeof defaults.logLevels)[number],
+    logLevel: rawLogLevel as LogLevel,
     discordToken,
     discordClientId,
-    discordGuildId,
   };
+
+  if (discordGuildId) {
+    environment.discordGuildId = discordGuildId;
+  }
+
+  return environment;
 }
