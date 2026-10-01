@@ -1,11 +1,11 @@
 import type { Client } from 'discord.js';
-import { registerCommands } from './commandRegistrar.js';
-import { loadCommands } from './commands/index.js';
-import { registerInteractionCreateEvent } from './events/interactionCreate.js';
-import { registerDiscordErrorEvent } from './events/error.js';
-import { registerMessageCreateEvent } from './events/messageCreate.js';
-import { registerReadyEvent } from './events/ready.js';
-import type { EnvironmentConfig } from '../config/environment.js';
+import { registerCommands } from './commandRegistrar.ts';
+import { loadCommands } from './commands/index.ts';
+import { registerInteractionCreateEvent } from './events/interactionCreate.ts';
+import { registerDiscordErrorEvent } from './events/error.ts';
+import { registerMessageCreateEvent } from './events/messageCreate.ts';
+import { registerReadyEvent } from './events/ready.ts';
+import type { EnvironmentConfig } from '../config/environment.ts';
 
 export function registerDiscordEvents(client: Client): void {
   registerReadyEvent(client);
