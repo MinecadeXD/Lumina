@@ -1,7 +1,7 @@
-import { createDiscordClient } from './discord/client.js';
-import { initializeDiscord, registerDiscordEvents } from './discord/index.js';
-import { loadEnvironment } from './config/environment.js';
-import { logger } from './logging/logger.js';
+import { createDiscordClient } from './discord/client.ts';
+import { initializeDiscord, registerDiscordEvents } from './discord/index.ts';
+import { loadEnvironment } from './config/environment.ts';
+import { logger } from './logging/logger.ts';
 
 async function main(): Promise<void> {
   const environment = loadEnvironment();
