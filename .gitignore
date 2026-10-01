@@ -5,3 +5,8 @@ dist/
 !.env.example
 *.log
 .DS_Store
+
+# Runtime database files
+data/*.sqlite
+data/*.sqlite-shm
+data/*.sqlite-wal
