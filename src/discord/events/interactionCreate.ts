@@ -1,6 +1,6 @@
 import type { Client, Interaction } from 'discord.js';
-import { loadCommands } from '../commands/index.js';
-import { logger } from '../../logging/logger.js';
+import { loadCommands } from '../commands/index.ts';
+import { logger } from '../../logging/logger.ts';
 
 export function registerInteractionCreateEvent(client: Client): void {
   const commands = loadCommands();
