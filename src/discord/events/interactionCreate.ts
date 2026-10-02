@@ -1,8 +1,13 @@
 import type { Client, Interaction } from 'discord.js';
 import { loadCommands } from '../commands/index.ts';
 import { logger } from '../../logging/logger.ts';
+import type { MessageRouter } from '../../core/messageRouter.ts';
+import { respondToInteraction } from '../responses/responder.ts';
 
-export function registerInteractionCreateEvent(client: Client): void {
+export function registerInteractionCreateEvent(
+  client: Client,
+  messageRouter: MessageRouter,
+): void {
   const commands = loadCommands();
 
   client.on('interactionCreate', async (interaction: Interaction) => {
@@ -18,21 +23,20 @@ export function registerInteractionCreateEvent(client: Client): void {
     }
 
     try {
-      await command.execute(interaction);
+      await command.execute(interaction, messageRouter);
     } catch (error) {
       logger.error(
-        `Command /${interaction.commandName} failed: ${error instanceof Error ? error.message : String(error)}`,
+        'Command /' + interaction.commandName + ' failed: ' +
+        (error instanceof Error ? error.message : String(error)),
       );
 
-      const response = {
-        content: 'Lumina could not complete that command.',
-        ephemeral: true,
-      };
-
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp(response).catch(() => undefined);
-      } else {
-        await interaction.reply(response).catch(() => undefined);
+      try {
+        await respondToInteraction(
+          interaction,
+          'Lumina could not complete that request.',
+        );
+      } catch {
+        // The interaction may already be expired or otherwise unavailable.
       }
     }
   });
