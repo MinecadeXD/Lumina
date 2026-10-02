@@ -1,7 +1,5 @@
-import type { Message } from 'discord.js';
-
 export class PermissionService {
-  public canUseAI(message: Message): boolean {
-    return !message.author.bot;
+  public canUseAI(_userId: string, _guildId: string | null): boolean {
+    return true;
   }
 }
