@@ -1,9 +1,16 @@
-import { createDatabase, closeDatabase } from './database/index.ts';
+import {
+  createDatabase,
+  closeDatabase,
+  ConversationRepository,
+  MessageRepository,
+  SettingsRepository,
+} from './database/index.ts';
 import { AIRouter, GeminiProvider, GroqProvider, OpenRouterProvider } from './ai/index.ts';
 import { createDiscordClient } from './discord/client.ts';
 import { initializeDiscord, registerDiscordEvents } from './discord/index.ts';
 import { loadEnvironment } from './config/environment.ts';
 import { logger } from './logging/logger.ts';
+import { MessageRouter } from './core/messageRouter.ts';
 
 async function main(): Promise<void> {
   const environment = loadEnvironment();
@@ -13,6 +20,7 @@ async function main(): Promise<void> {
   const aiRouter = new AIRouter({
     primary: environment.primaryAIProvider,
     fallbacks: environment.fallbackAIProviders,
+    models: environment.aiModels,
   });
 
   aiRouter.register(new GeminiProvider(environment.geminiApiKey));
@@ -23,11 +31,18 @@ async function main(): Promise<void> {
   if (availableProviders.length === 0) {
     logger.warn('No AI provider API keys are configured. AI requests will be unavailable.');
   } else {
-    logger.info(`AI providers available: ${availableProviders.join(', ')}`);
+    logger.info('AI providers available: ' + availableProviders.join(', '));
   }
 
+  const messageRouter = new MessageRouter(
+    aiRouter,
+    new ConversationRepository(database),
+    new MessageRepository(database),
+    new SettingsRepository(database),
+  );
+
   const client = createDiscordClient();
-  registerDiscordEvents(client);
+  registerDiscordEvents(client, messageRouter);
 
   let shuttingDown = false;
 
@@ -35,7 +50,7 @@ async function main(): Promise<void> {
     if (shuttingDown) return;
     shuttingDown = true;
 
-    logger.info(`Received ${signal}; shutting down Lumina.`);
+    logger.info('Received ' + signal + '; shutting down Lumina.');
 
     try {
       client.destroy();
@@ -50,7 +65,7 @@ async function main(): Promise<void> {
   process.once('SIGTERM', () => void shutdown('SIGTERM'));
 
   try {
-    await initializeDiscord(client, environment);
+    await initializeDiscord(client, environment, messageRouter);
     await client.login(environment.discordToken);
   } catch (error) {
     logger.fatal(error);
