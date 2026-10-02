@@ -7,51 +7,43 @@ const levelPriority: Record<LogLevel, number> = {
   error: 40
 };
 
+let configuredLevel: LogLevel = "info";
+
 function shouldLog(current: LogLevel, messageLevel: LogLevel): boolean {
   return levelPriority[messageLevel] >= levelPriority[current];
 }
 
 function write(level: LogLevel, message: string, details?: unknown): void {
   const timestamp = new Date().toISOString();
-  const prefix = `[${timestamp}] [${level.toUpperCase()}]`;
+  const prefix = "[" + timestamp + "] [" + level.toUpperCase() + "]";
 
   if (details === undefined) {
-    console.log(`${prefix} ${message}`);
+    console.log(prefix + " " + message);
     return;
   }
 
-  console.log(`${prefix} ${message}`, details);
-}
-
-function getConfiguredLevel(): LogLevel {
-  const value = process.env.LOG_LEVEL;
-
-  if (value === "debug" || value === "info" || value === "warn" || value === "error") {
-    return value;
-  }
-
-  return "info";
+  console.log(prefix + " " + message, details);
 }
 
 export const logger = {
+  configure(level: LogLevel): void {
+    configuredLevel = level;
+  },
+
   debug(message: string, details?: unknown): void {
-    const level = getConfiguredLevel();
-    if (shouldLog(level, "debug")) write("debug", message, details);
+    if (shouldLog(configuredLevel, "debug")) write("debug", message, details);
   },
 
   info(message: string, details?: unknown): void {
-    const level = getConfiguredLevel();
-    if (shouldLog(level, "info")) write("info", message, details);
+    if (shouldLog(configuredLevel, "info")) write("info", message, details);
   },
 
   warn(message: string, details?: unknown): void {
-    const level = getConfiguredLevel();
-    if (shouldLog(level, "warn")) write("warn", message, details);
+    if (shouldLog(configuredLevel, "warn")) write("warn", message, details);
   },
 
   error(message: string, details?: unknown): void {
-    const level = getConfiguredLevel();
-    if (shouldLog(level, "error")) write("error", message, details);
+    if (shouldLog(configuredLevel, "error")) write("error", message, details);
   },
 
   fatal(error: unknown): void {
