@@ -6,6 +6,7 @@ import {
 } from '../database/index.ts';
 import { logger } from '../logging/logger.ts';
 import { ConversationManager } from './conversationManager.ts';
+import { PermissionService } from './permissions.ts';
 import { ContextBuilder } from '../ai/contextBuilder.ts';
 
 export interface MessageRouterInput {
@@ -24,6 +25,7 @@ export interface MessageRouterResult {
 
 export class MessageRouter {
   private readonly conversations: ConversationManager;
+  private readonly permissions = new PermissionService();
   private readonly contextBuilder: ContextBuilder;
 
   public constructor(
@@ -36,9 +38,17 @@ export class MessageRouter {
     this.contextBuilder = new ContextBuilder(messages);
   }
 
+  public isDedicatedAIChannel(guildId: string, channelId: string): boolean {
+    return this.settings.get('guild', guildId, 'ai_channel_id')?.value === channelId;
+  }
+
   public async process(input: MessageRouterInput): Promise<MessageRouterResult> {
+    if (!this.permissions.canUseAI(input.userId, input.guildId)) {
+      throw new Error('You do not have permission to use Lumina.');
+    }
+
     const sharedChannel = input.guildId !== null &&
-      this.settings.get('guild', input.guildId, 'ai_channel_id')?.value === input.channelId;
+      this.isDedicatedAIChannel(input.guildId, input.channelId);
 
     const conversation = this.conversations.getOrCreate({
       userId: input.userId,
