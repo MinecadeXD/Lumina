@@ -16,6 +16,7 @@ export const askCommand: Command = {
     ),
   async execute(interaction: ChatInputCommandInteraction, messageRouter: MessageRouter) {
     const content = interaction.options.getString('message', true);
+    await interaction.deferReply();
 
     const result = await messageRouter.process({
       content,
