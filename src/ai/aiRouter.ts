@@ -5,6 +5,7 @@ import { logger } from '../logging/logger.ts';
 export interface AIRouterOptions {
   primary: string;
   fallbacks?: readonly string[];
+  models?: Readonly<Record<string, string>>;
 }
 
 export class AIRouter {
@@ -38,45 +39,44 @@ export class AIRouter {
       const provider = this.providers.get(name);
 
       if (!provider) {
-        const error = new AIProviderError(
-          `Configured AI provider "${name}" is not registered.`,
+        throw new AIProviderError(
+          'Configured AI provider "' + name + '" is not registered.',
           'configuration',
           name,
         );
-
-        // A missing provider is a permanent configuration problem. Never
-        // hide it by silently continuing to another provider.
-        throw error;
       }
 
-      // Missing credentials are a configuration problem. For the primary
-      // provider, surface it immediately. For an explicitly configured
-      // fallback, skip it so later valid fallbacks can still be used.
       if (!provider.isAvailable()) {
         if (name === this.options.primary) {
           throw new AIProviderError(
-            `${name} API credentials are not configured.`,
+            name + ' API credentials are not configured.',
             'configuration',
             name,
           );
         }
 
-        logger.debug(`Skipping unavailable fallback provider: ${name}`);
+        logger.debug('Skipping unavailable fallback provider: ' + name);
         continue;
       }
 
+      const model = this.options.models?.[name] ?? request.model;
+      if (!model) {
+        throw new AIProviderError(
+          'No model is configured for AI provider "' + name + '".',
+          'configuration',
+          name,
+        );
+      }
+
       try {
-        return await provider.generate(request);
+        return await provider.generate({ ...request, model });
       } catch (error) {
-        if (!isRetryableAIError(error)) {
-          // Authentication, invalid requests, invalid model configuration,
-          // and other permanent provider errors must remain visible.
-          throw error;
-        }
+        if (!isRetryableAIError(error)) throw error;
 
         lastRetryableError = error;
         logger.warn(
-          `AI provider "${name}" failed with a retryable error (${error.code}); trying the next configured provider.`,
+          'AI provider "' + name + '" failed with a retryable error (' +
+          error.code + '); trying the next configured provider.',
         );
       }
     }
