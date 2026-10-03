@@ -11,7 +11,18 @@ async function main():Promise<void>{
   const aiRouter=new AIRouter({primary:environment.primaryAIProvider,fallbacks:environment.fallbackAIProviders,models:environment.aiModels});
   aiRouter.register(new GeminiProvider(environment.geminiApiKey)); aiRouter.register(new GroqProvider(environment.groqApiKey)); aiRouter.register(new OpenRouterProvider(environment.openrouterApiKey));
   const availableProviders=aiRouter.availableProviders(); if(availableProviders.length===0)logger.warn('No AI provider API keys are configured. AI requests will be unavailable.'); else logger.info('AI providers available: '+availableProviders.join(', '));
-  const messageRouter=new MessageRouter(aiRouter,new ConversationRepository(database),new MessageRepository(database),new SettingsRepository(database),environment.aiTimeoutMs,environment.conversationInactivityMs);
+  const messageRouter=new MessageRouter(aiRouter,new ConversationRepository(database),new MessageRepository(database),new SettingsRepository(database),environment.aiTimeoutMs,
+    environment.conversationInactivityMs,
+    {
+      maxContextTokens: environment.contextMaxTokens,
+      recentMessages: environment.contextRecentMessages,
+      maxSummaryTokens: environment.contextMaxSummaryTokens,
+      summaryTriggerMessages: environment.summaryTriggerMessages,
+      summarySourceMessages: environment.summarySourceMessages,
+      summaryRecentMessagesToKeep: environment.summaryRecentMessagesToKeep,
+      summaryMaxTokens: environment.summaryMaxTokens,
+    },
+  );
   const client=createDiscordClient(); registerDiscordEvents(client,messageRouter); let shuttingDown=false;
   const shutdown=async(signal:NodeJS.Signals):Promise<void>=>{if(shuttingDown)return;shuttingDown=true;logger.info('Received '+signal+'; shutting down Lumina.');try{client.destroy();}finally{closeDatabase(database);}logger.info('Lumina shutdown complete.');};
   process.once('SIGINT',()=>void shutdown('SIGINT')); process.once('SIGTERM',()=>void shutdown('SIGTERM'));
