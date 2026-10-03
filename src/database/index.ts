@@ -6,3 +6,8 @@ export {
   MessageRepository,
   MemoryRepository,
 } from './repositories/index.ts';
+export type {
+  ConversationRecord,
+  ConversationScope,
+  CreateConversationInput,
+} from './repositories/conversations.ts';
