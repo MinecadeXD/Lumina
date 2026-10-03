@@ -2,11 +2,13 @@ import type { Client, Interaction } from 'discord.js';
 import { loadCommands } from '../commands/index.ts';
 import { logger } from '../../logging/logger.ts';
 import type { MessageRouter } from '../../core/messageRouter.ts';
+import type { MemoryManager } from '../../memory/memoryManager.ts';
 import { respondToInteraction } from '../responses/responder.ts';
 
 export function registerInteractionCreateEvent(
   client: Client,
   messageRouter: MessageRouter,
+  memoryManager: MemoryManager,
 ): void {
   const commands = loadCommands();
 
@@ -23,7 +25,7 @@ export function registerInteractionCreateEvent(
     }
 
     try {
-      await command.execute(interaction, messageRouter);
+      await command.execute(interaction, messageRouter, memoryManager);
     } catch (error) {
       logger.error(
         'Command /' + interaction.commandName + ' failed: ' +
