@@ -1,8 +1,13 @@
-import type { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import type {
+  ChatInputCommandInteraction,
+  SlashCommandBuilder,
+  SlashCommandOptionsOnlyBuilder,
+  SlashCommandSubcommandsOnlyBuilder,
+} from 'discord.js';
 import type { MessageRouter } from '../../core/messageRouter.ts';
 
 export interface Command {
-  data: SlashCommandBuilder;
+  data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
   execute: (
     interaction: ChatInputCommandInteraction,
     messageRouter: MessageRouter,
