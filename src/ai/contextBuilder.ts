@@ -30,7 +30,9 @@ export class ContextBuilder {
       ? this.truncateToTokens(conversation.summary, this.options.maxSummaryTokens)
       : null;
     const recent = this.messages.listByConversation(conversationId, this.options.recentMessages);
-    const userMemories = this.memories.listByUser(userId, this.options.maxMemories);
+    const userMemories = conversation?.scopeType === 'channel'
+      ? []
+      : this.memories.listByUser(userId, this.options.maxMemories);
     const memoryText = this.buildMemoryContext(userMemories);
 
     const contextMessages = [
