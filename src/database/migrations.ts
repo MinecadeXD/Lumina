@@ -15,4 +15,7 @@ export const migrations: readonly Migration[] = [
       ALTER TABLE conversations ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
       CREATE INDEX IF NOT EXISTS idx_conversations_status_activity ON conversations (status, last_activity_at);
     ` },
+  { version: 3, sql: `
+      ALTER TABLE conversations ADD COLUMN summary_message_count INTEGER NOT NULL DEFAULT 0;
+    ` },
 ];
