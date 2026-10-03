@@ -26,7 +26,7 @@ async function main():Promise<void>{
       summaryMaxTokens: environment.summaryMaxTokens,
     },
   );
-  const client=createDiscordClient(); registerDiscordEvents(client,messageRouter); let shuttingDown=false;
+  const client=createDiscordClient(); registerDiscordEvents(client,messageRouter,memoryManager); let shuttingDown=false;
   const shutdown=async(signal:NodeJS.Signals):Promise<void>=>{if(shuttingDown)return;shuttingDown=true;logger.info('Received '+signal+'; shutting down Lumina.');try{client.destroy();}finally{closeDatabase(database);}logger.info('Lumina shutdown complete.');};
   process.once('SIGINT',()=>void shutdown('SIGINT')); process.once('SIGTERM',()=>void shutdown('SIGTERM'));
   try{await initializeDiscord(client,environment,messageRouter);await client.login(environment.discordToken);}catch(error){logger.fatal(error);try{client.destroy();}finally{closeDatabase(database);}process.exitCode=1;}
