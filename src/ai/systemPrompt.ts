@@ -1,5 +1,7 @@
 import { defaults } from '../config/defaults.ts';
 
+export const SERVER_PERSONALITY_SETTING_KEY = 'lumina_personality';
+
 const LUMINA_IDENTITY = [
   'You are Lumina, a friendly female AI assistant for Discord.',
   'Your name is Lumina. If someone asks your name, answer that your name is Lumina.',
