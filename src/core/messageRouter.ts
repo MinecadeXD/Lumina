@@ -6,6 +6,7 @@ import { logger } from '../logging/logger.ts';
 import { ConversationManager } from './conversationManager.ts';
 import { PermissionService } from './permissions.ts';
 import { ContextBuilder } from '../ai/contextBuilder.ts';
+import { DISCORD_RESPONSE_TOO_LONG, formatDiscordResponse, isDiscordResponseWithinLimit } from '../utils/formatting.ts';
 import type { SystemPromptBuilder } from '../ai/systemPrompt.ts';
 import { SERVER_PERSONALITY_SETTING_KEY } from '../ai/systemPrompt.ts';
 
@@ -149,16 +150,27 @@ export class MessageRouter {
 
     try {
       const response = await this.aiRouter.generate(context);
+      const formattedResponse = formatDiscordResponse(response.content);
+
+      if (!isDiscordResponseWithinLimit(formattedResponse)) {
+        logger.info('AI response exceeded the 1900-character Discord response budget.');
+        return {
+          content: DISCORD_RESPONSE_TOO_LONG,
+          conversationId: conversation.id,
+          provider: response.provider,
+        };
+      }
+
       this.messages.create({
         conversationId: conversation.id,
         role: 'assistant',
-        content: response.content,
+        content: formattedResponse,
       });
 
       await this.summarizer.maybeSummarize(conversation.id);
 
       return {
-        content: response.content,
+        content: formattedResponse,
         conversationId: conversation.id,
         provider: response.provider,
       };
