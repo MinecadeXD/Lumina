@@ -21,10 +21,9 @@ export class ConversationSummarizer {
 
   public async maybeSummarize(conversationId: number): Promise<void> {
     const count = this.messages.countByConversation(conversationId);
-    if (count - conversation.summaryMessageCount <= this.options.triggerMessages) return;
-
     const conversation = this.conversations.getById(conversationId);
     if (!conversation) return;
+    if (count - conversation.summaryMessageCount <= this.options.triggerMessages) return;
 
     const history = this.messages.listByConversation(conversationId, this.options.sourceMessages);
     const cutoff = Math.max(0, history.length - this.options.recentMessagesToKeep);
