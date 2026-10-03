@@ -7,14 +7,16 @@ import { registerMessageCreateEvent } from './events/messageCreate.ts';
 import { registerReadyEvent } from './events/ready.ts';
 import type { EnvironmentConfig } from '../config/environment.ts';
 import type { MessageRouter } from '../core/messageRouter.ts';
+import type { MemoryManager } from '../memory/memoryManager.ts';
 
 export function registerDiscordEvents(
   client: Client,
   messageRouter: MessageRouter,
+  memoryManager: MemoryManager,
 ): void {
   registerReadyEvent(client);
   registerMessageCreateEvent(client, messageRouter);
-  registerInteractionCreateEvent(client, messageRouter);
+  registerInteractionCreateEvent(client, messageRouter, memoryManager);
   registerDiscordErrorEvent(client);
 }
 
