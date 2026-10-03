@@ -44,6 +44,7 @@ export class MessageRouter {
     private readonly messages: MessageRepository,
     private readonly settings: SettingsRepository,
     memoryManager: MemoryManager,
+    private readonly memoryRepository: import('../database/index.ts').MemoryRepository,
     private readonly aiTimeoutMs = 30_000,
     inactivityMs = 24 * 60 * 60 * 1000,
     contextOptions: MessageContextOptions = {
@@ -61,7 +62,7 @@ export class MessageRouter {
       conversationRepository,
       inactivityMs,
     );
-    this.contextBuilder = new ContextBuilder(messages, conversationRepository, {
+    this.contextBuilder = new ContextBuilder(messages, conversationRepository, this.memoryRepository, {
       maxContextTokens: contextOptions.maxContextTokens,
       recentMessages: contextOptions.recentMessages,
       maxSummaryTokens: contextOptions.maxSummaryTokens,
