@@ -81,7 +81,7 @@ export function loadEnvironment(): EnvironmentConfig {
     primaryAIProvider,
     fallbackAIProviders,
     aiModels: {
-      gemini: process.env.GEMINI_MODEL?.trim() || 'gemini-2.5-flash',
+      gemini: process.env.GEMINI_MODEL?.trim() || 'gemini-3.8-flash',
       groq: process.env.GROQ_MODEL?.trim() || 'llama-3.3-70b-versatile',
       openrouter: process.env.OPENROUTER_MODEL?.trim() || 'openai/gpt-oss-120b:free',
     },
