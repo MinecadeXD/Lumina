@@ -67,6 +67,14 @@ export class MessageRepository {
     return rows.map((row) => this.map(row));
   }
 
+  public countByConversation(conversationId: number): number {
+    const row = this.database
+      .prepare('SELECT COUNT(*) AS count FROM messages WHERE conversation_id = ?')
+      .get(conversationId) as { count: number };
+
+    return row.count;
+  }
+
   public deleteByConversation(conversationId: number): number {
     return this.database
       .prepare('DELETE FROM messages WHERE conversation_id = ?')
