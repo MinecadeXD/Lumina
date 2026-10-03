@@ -5,7 +5,7 @@ export type ConversationStatus = 'active' | 'inactive';
 
 export interface ConversationRecord {
   id: number; scopeType: ConversationScope; status: ConversationStatus; userId: string | null; channelId: string | null; guildId: string | null;
-  summary: string | null; createdAt: string; updatedAt: string; lastActivityAt: string;
+  summary: string | null; summaryMessageCount: number; createdAt: string; updatedAt: string; lastActivityAt: string;
 }
 export interface CreateConversationInput { scopeType: ConversationScope; userId?: string | null; channelId?: string | null; guildId?: string | null; }
 
@@ -13,7 +13,7 @@ export class ConversationRepository {
   public constructor(private readonly database: SQLiteDatabase) {}
   public create(input: CreateConversationInput): ConversationRecord {
     const now = new Date().toISOString();
-    const result = this.database.prepare(`INSERT INTO conversations (scope_type,user_id,channel_id,guild_id,summary,created_at,updated_at,last_activity_at,status) VALUES (?,?,?,?,NULL,?,?,?,'active')`).run(input.scopeType,input.userId??null,input.channelId??null,input.guildId??null,now,now,now);
+    const result = this.database.prepare(`INSERT INTO conversations (scope_type,user_id,channel_id,guild_id,summary,summary_message_count,created_at,updated_at,last_activity_at,status) VALUES (?,?,?,?,NULL,?,?,?,'active')`).run(input.scopeType,input.userId??null,input.channelId??null,input.guildId??null,now,0,now,now,now);
     return this.getById(Number(result.lastInsertRowid))!;
   }
   public getById(id: number): ConversationRecord | null {
@@ -33,6 +33,6 @@ export class ConversationRepository {
   public touch(id:number):void { const now=new Date().toISOString(); this.database.prepare("UPDATE conversations SET updated_at=?,last_activity_at=?,status='active' WHERE id=?").run(now,now,id); }
   public updateSummary(id:number,summary:string|null):void { this.database.prepare('UPDATE conversations SET summary=?,updated_at=? WHERE id=?').run(summary,new Date().toISOString(),id); }
   public delete(id:number):boolean { return this.database.prepare('DELETE FROM conversations WHERE id=?').run(id).changes>0; }
-  private map(row:RawConversation):ConversationRecord { return {id:row.id,scopeType:row.scope_type as ConversationScope,status:row.status as ConversationStatus,userId:row.user_id,channelId:row.channel_id,guildId:row.guild_id,summary:row.summary,createdAt:row.created_at,updatedAt:row.updated_at,lastActivityAt:row.last_activity_at}; }
+  private map(row:RawConversation):ConversationRecord { return {id:row.id,scopeType:row.scope_type as ConversationScope,status:row.status as ConversationStatus,userId:row.user_id,channelId:row.channel_id,guildId:row.guild_id,summary:row.summary,summaryMessageCount:row.summary_message_count,createdAt:row.created_at,updatedAt:row.updated_at,lastActivityAt:row.last_activity_at}; }
 }
-interface RawConversation { id:number;scope_type:string;status:string;user_id:string|null;channel_id:string|null;guild_id:string|null;summary:string|null;created_at:string;updated_at:string;last_activity_at:string; }
+interface RawConversation { id:number;scope_type:string;status:string;user_id:string|null;channel_id:string|null;guild_id:string|null;summary:string|null;summary_message_count:number;created_at:string;updated_at:string;last_activity_at:string; }
