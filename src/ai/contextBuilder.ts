@@ -52,7 +52,9 @@ export class ContextBuilder {
       this.estimateTokens(contextMessages) + this.estimateTokens([current]) > budget
     ) {
       const removableIndex = contextMessages.findIndex(
-        (message) => message.role !== 'system' || message.content !== LUMINA_SYSTEM_IDENTITY,
+        (message, index) =>
+          index > 0 &&
+          message.role !== 'system',
       );
       if (removableIndex < 0) break;
       contextMessages.splice(removableIndex, 1);
