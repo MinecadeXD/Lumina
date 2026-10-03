@@ -18,6 +18,24 @@ export class MemoryManager {
     return this.memories.deleteByIdForUser(id, userId);
   }
 
+  public rememberFromMessage(userId: string, content: string): boolean {
+    const match = content.match(/^\s*(?:remember that|remember)\s+(.+)$/i);
+    if (!match) return false;
+    const memory = match[1].trim();
+    if (!memory || memory.length > 500) return false;
+    this.add(userId, memory);
+    return true;
+  }
+
+  public forgetFromMessage(userId: string, content: string): boolean {
+    const match = content.match(/^\s*(?:forget that|forget|don't remember that|do not remember that)\s+(.+)$/i);
+    if (!match) return false;
+    const target = match[1].trim().toLowerCase();
+    const memories = this.list(userId);
+    const matchMemory = memories.find((memory) => memory.content.toLowerCase() === target);
+    return matchMemory ? this.remove(userId, matchMemory.id) : false;
+  }
+
   public clear(userId: string): number {
     return this.memories.deleteAllForUser(userId);
   }
