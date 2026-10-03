@@ -1,5 +1,6 @@
 import type { AIRouter } from '../ai/index.ts';
 import { ConversationSummarizer } from '../ai/summarizer.ts';
+import { MemoryManager } from '../memory/memoryManager.ts';
 import { ConversationRepository, MessageRepository, SettingsRepository } from '../database/index.ts';
 import { logger } from '../logging/logger.ts';
 import { ConversationManager } from './conversationManager.ts';
@@ -35,12 +36,14 @@ export class MessageRouter {
   private readonly permissions = new PermissionService();
   private readonly contextBuilder: ContextBuilder;
   private readonly summarizer: ConversationSummarizer;
+  private readonly memoryManager: MemoryManager;
 
   public constructor(
     private readonly aiRouter: AIRouter,
     conversationRepository: ConversationRepository,
     private readonly messages: MessageRepository,
     private readonly settings: SettingsRepository,
+    memoryManager: MemoryManager,
     private readonly aiTimeoutMs = 30_000,
     inactivityMs = 24 * 60 * 60 * 1000,
     contextOptions: MessageContextOptions = {
@@ -53,6 +56,7 @@ export class MessageRouter {
       summaryMaxTokens: 700,
     },
   ) {
+    this.memoryManager = memoryManager;
     this.conversations = new ConversationManager(
       conversationRepository,
       inactivityMs,
@@ -102,6 +106,7 @@ export class MessageRouter {
     );
     const context = this.contextBuilder.build(
       conversation.id,
+      input.userId,
       input.content,
       this.aiTimeoutMs,
     );
