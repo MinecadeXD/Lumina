@@ -31,7 +31,9 @@ export function registerMessageCreateEvent(
     }
 
     try {
-      await message.channel.sendTyping();
+      if ('sendTyping' in message.channel && typeof message.channel.sendTyping === 'function') {
+        await message.channel.sendTyping();
+      }
 
       const result = await messageRouter.process({
         content,
