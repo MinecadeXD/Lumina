@@ -21,7 +21,7 @@ export class ConversationSummarizer {
 
   public async maybeSummarize(conversationId: number): Promise<void> {
     const count = this.messages.countByConversation(conversationId);
-    if (count <= this.options.triggerMessages) return;
+    if (count - conversation.summaryMessageCount <= this.options.triggerMessages) return;
 
     const conversation = this.conversations.getById(conversationId);
     if (!conversation) return;
@@ -67,7 +67,7 @@ export class ConversationSummarizer {
       });
       const summary = response.content.trim();
       if (!summary) return;
-      this.conversations.updateSummary(conversationId, summary);
+      this.conversations.updateSummary(conversationId, summary, count);
       logger.debug('Updated conversation summary for conversation #' + conversationId + '.');
     } catch (error) {
       logger.warn(
