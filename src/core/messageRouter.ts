@@ -6,6 +6,8 @@ import { logger } from '../logging/logger.ts';
 import { ConversationManager } from './conversationManager.ts';
 import { PermissionService } from './permissions.ts';
 import { ContextBuilder } from '../ai/contextBuilder.ts';
+import type { SystemPromptBuilder } from '../ai/systemPrompt.ts';
+import { SERVER_PERSONALITY_SETTING_KEY } from '../ai/systemPrompt.ts';
 
 export interface MessageRouterInput {
   content: string;
@@ -43,6 +45,7 @@ export class MessageRouter {
     conversationRepository: ConversationRepository,
     private readonly messages: MessageRepository,
     private readonly settings: SettingsRepository,
+    systemPromptBuilder: SystemPromptBuilder,
     memoryManager: MemoryManager,
     private readonly memoryRepository: import('../database/index.ts').MemoryRepository,
     private readonly aiTimeoutMs = 30_000,
@@ -62,7 +65,7 @@ export class MessageRouter {
       conversationRepository,
       inactivityMs,
     );
-    this.contextBuilder = new ContextBuilder(messages, conversationRepository, this.memoryRepository, {
+    this.contextBuilder = new ContextBuilder(messages, conversationRepository, this.memoryRepository, settings, systemPromptBuilder, {
       maxContextTokens: contextOptions.maxContextTokens,
       recentMessages: contextOptions.recentMessages,
       maxSummaryTokens: contextOptions.maxSummaryTokens,
@@ -81,6 +84,25 @@ export class MessageRouter {
         timeoutMs: aiTimeoutMs,
       },
     );
+  }
+
+  public getServerPersonality(guildId: string): string | null {
+    return this.settings.get('guild', guildId, SERVER_PERSONALITY_SETTING_KEY)?.value ?? null;
+  }
+
+  public setServerPersonality(guildId: string, personality: string): void {
+    const normalized = personality.trim().replace(/\\s+/g, ' ');
+    if (!normalized) {
+      throw new Error('Server personality cannot be empty.');
+    }
+    if (normalized.length > 1500) {
+      throw new Error('Server personality must be 1500 characters or fewer.');
+    }
+    this.settings.set('guild', guildId, SERVER_PERSONALITY_SETTING_KEY, normalized);
+  }
+
+  public clearServerPersonality(guildId: string): boolean {
+    return this.settings.delete('guild', guildId, SERVER_PERSONALITY_SETTING_KEY);
   }
 
   public isDedicatedAIChannel(guildId: string, channelId: string): boolean {
