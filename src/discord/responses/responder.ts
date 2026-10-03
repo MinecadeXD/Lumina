@@ -5,7 +5,7 @@ import {
   formatDiscordResponse,
 } from '../../utils/formatting.ts';
 
-const SAFE_MENTION_POLICY = { parse: [] as ('users' | 'roles' | 'everyone')[] };
+const ALLOWED_MENTION_POLICY = { parse: ['users', 'roles'] as ('users' | 'roles')[] };
 
 export async function sendTypingIndicator(message: Message): Promise<void> {
   if ('sendTyping' in message.channel && typeof message.channel.sendTyping === 'function') {
@@ -21,7 +21,7 @@ export async function respondToMessage(message: Message, content: string): Promi
 
   await message.reply({
     content: safeContent || 'Lumina did not return a response.',
-    allowedMentions: { ...SAFE_MENTION_POLICY, repliedUser: false },
+    allowedMentions: { ...ALLOWED_MENTION_POLICY, repliedUser: false },
   });
 }
 
@@ -38,7 +38,7 @@ export async function respondToInteraction(
 
   await interaction.editReply({
     content: safeContent || 'Lumina did not return a response.',
-    allowedMentions: SAFE_MENTION_POLICY,
+    allowedMentions: ALLOWED_MENTION_POLICY,
   });
 }
 
