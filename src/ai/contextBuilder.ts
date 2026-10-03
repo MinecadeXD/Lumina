@@ -1,22 +1,27 @@
 import type { AIRequest } from './provider.ts';
-import { MessageRepository, ConversationRepository } from '../database/index.ts';
+import { MessageRepository, ConversationRepository, MemoryRepository } from '../database/index.ts';
+import type { MemoryRecord } from '../database/repositories/memories.ts';
 import { LUMINA_SYSTEM_IDENTITY } from './identity.ts';
 
 export interface ContextBuilderOptions {
   maxContextTokens: number;
   recentMessages: number;
   maxSummaryTokens: number;
+  maxMemories: number;
+  maxMemoryTokens: number;
 }
 
 export class ContextBuilder {
   public constructor(
     private readonly messages: MessageRepository,
     private readonly conversations: ConversationRepository,
+    private readonly memories: MemoryRepository,
     private readonly options: ContextBuilderOptions,
   ) {}
 
   public build(
     conversationId: number,
+    userId: string,
     currentMessage: string,
     timeoutMs = 30_000,
   ): AIRequest {
@@ -24,55 +29,42 @@ export class ContextBuilder {
     const summary = conversation?.summary
       ? this.truncateToTokens(conversation.summary, this.options.maxSummaryTokens)
       : null;
-
-    const recent = this.messages.listByConversation(
-      conversationId,
-      this.options.recentMessages,
-    );
+    const recent = this.messages.listByConversation(conversationId, this.options.recentMessages);
+    const userMemories = this.memories.listByUser(userId, this.options.maxMemories);
+    const memoryText = this.buildMemoryContext(userMemories);
 
     const contextMessages = [
       { role: 'system' as const, content: LUMINA_SYSTEM_IDENTITY },
-      ...(summary
-        ? [{
-            role: 'system' as const,
-            content: 'Conversation summary:\n' + summary,
-          }]
-        : []),
-      ...recent.map((message) => ({
-        role: message.role,
-        content: message.content,
-      })),
+      ...(summary ? [{ role: 'system' as const, content: 'Conversation summary:\n' + summary }] : []),
+      ...(memoryText ? [{ role: 'system' as const, content: 'Relevant long-term memories for this user:\n' + memoryText }] : []),
+      ...recent.map((message) => ({ role: message.role, content: message.content })),
     ];
 
     const current = { role: 'user' as const, content: currentMessage };
     const budget = Math.max(1, this.options.maxContextTokens);
 
     while (
-      contextMessages.length > 2 &&
+      contextMessages.length > 1 &&
       this.estimateTokens(contextMessages) + this.estimateTokens([current]) > budget
     ) {
-      const removableIndex = contextMessages.findIndex(
-        (message, index) =>
-          index > 0 &&
-          message.role !== 'system',
-      );
+      const removableIndex = contextMessages.findIndex((message) => message.role !== 'system');
       if (removableIndex < 0) break;
       contextMessages.splice(removableIndex, 1);
     }
 
-    return {
-      model: '',
-      messages: [...contextMessages, current],
-      timeoutMs,
-    };
+    return { model: '', messages: [...contextMessages, current], timeoutMs };
   }
 
-  private estimateTokens(
-    messages: readonly { content: string }[],
-  ): number {
-    return Math.ceil(
-      messages.reduce((total, message) => total + message.content.length, 0) / 4,
+  private buildMemoryContext(memories: readonly MemoryRecord[]): string {
+    if (memories.length === 0) return '';
+    return this.truncateToTokens(
+      memories.map((memory) => '- ' + memory.content).join('\n'),
+      this.options.maxMemoryTokens,
     );
+  }
+
+  private estimateTokens(messages: readonly { content: string }[]): number {
+    return Math.ceil(messages.reduce((total, message) => total + message.content.length, 0) / 4);
   }
 
   private truncateToTokens(content: string, maxTokens: number): string {
