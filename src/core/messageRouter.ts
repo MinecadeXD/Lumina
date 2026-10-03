@@ -121,6 +121,9 @@ export class MessageRouter {
       content: input.content,
     });
 
+    this.memoryManager.rememberFromMessage(input.userId, input.content);
+    this.memoryManager.forgetFromMessage(input.userId, input.content);
+
     try {
       const response = await this.aiRouter.generate(context);
       this.messages.create({
