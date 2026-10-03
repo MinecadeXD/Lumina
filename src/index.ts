@@ -1,4 +1,4 @@
-import { createDatabase, closeDatabase, ConversationRepository, MessageRepository, SettingsRepository } from './database/index.ts';
+import { createDatabase, closeDatabase, ConversationRepository, MessageRepository, SettingsRepository, MemoryRepository } from './database/index.ts';
 import { AIRouter, GeminiProvider, GroqProvider, OpenRouterProvider } from './ai/index.ts';
 import { createDiscordClient } from './discord/client.ts';
 import { initializeDiscord, registerDiscordEvents } from './discord/index.ts';
@@ -12,8 +12,9 @@ async function main():Promise<void>{
   const aiRouter=new AIRouter({primary:environment.primaryAIProvider,fallbacks:environment.fallbackAIProviders,models:environment.aiModels});
   aiRouter.register(new GeminiProvider(environment.geminiApiKey)); aiRouter.register(new GroqProvider(environment.groqApiKey)); aiRouter.register(new OpenRouterProvider(environment.openrouterApiKey));
   const availableProviders=aiRouter.availableProviders(); if(availableProviders.length===0)logger.warn('No AI provider API keys are configured. AI requests will be unavailable.'); else logger.info('AI providers available: '+availableProviders.join(', '));
-  const memoryManager = new MemoryManager(new (await import('./database/index.ts')).MemoryRepository(database));
-  const messageRouter=new MessageRouter(aiRouter,new ConversationRepository(database),new MessageRepository(database),new SettingsRepository(database),memoryManager,new (await import('./database/index.ts')).MemoryRepository(database),environment.aiTimeoutMs,
+  const memoryRepository = new MemoryRepository(database);
+  const memoryManager = new MemoryManager(memoryRepository);
+  const messageRouter=new MessageRouter(aiRouter,new ConversationRepository(database),new MessageRepository(database),new SettingsRepository(database),memoryManager,memoryRepository,environment.aiTimeoutMs,
     environment.conversationInactivityMs,
     {
       maxContextTokens: environment.contextMaxTokens,
