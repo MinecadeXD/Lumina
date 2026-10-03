@@ -91,7 +91,7 @@ export class MessageRouter {
   }
 
   public setServerPersonality(guildId: string, personality: string): void {
-    const normalized = personality.trim().replace(/\\s+/g, ' ');
+    const normalized = personality.trim().replace(/\s+/g, ' ');
     if (!normalized) {
       throw new Error('Server personality cannot be empty.');
     }
