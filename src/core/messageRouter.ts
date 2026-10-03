@@ -66,6 +66,8 @@ export class MessageRouter {
       maxContextTokens: contextOptions.maxContextTokens,
       recentMessages: contextOptions.recentMessages,
       maxSummaryTokens: contextOptions.maxSummaryTokens,
+      maxMemories: 20,
+      maxMemoryTokens: 1000,
     });
     this.summarizer = new ConversationSummarizer(
       aiRouter,
