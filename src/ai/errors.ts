@@ -20,7 +20,7 @@ export class AIProviderError extends AppError {
   }
 }
 
-export function isRetryableAIError(error: unknown): boolean {
+export function isRetryableAIError(error: unknown): error is AIProviderError {
   return error instanceof AIProviderError &&
     ['rate_limit', 'timeout', 'unavailable'].includes(error.code);
 }
