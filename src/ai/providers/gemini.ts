@@ -85,6 +85,21 @@ export class GeminiProvider implements AIProvider {
         );
       }
 
+      const usageMetadata = gemini.usageMetadata;
+      const usage = usageMetadata
+        ? {
+            ...(usageMetadata.promptTokenCount === undefined
+              ? {}
+              : { promptTokens: usageMetadata.promptTokenCount }),
+            ...(usageMetadata.candidatesTokenCount === undefined
+              ? {}
+              : { completionTokens: usageMetadata.candidatesTokenCount }),
+            ...(usageMetadata.totalTokenCount === undefined
+              ? {}
+              : { totalTokens: usageMetadata.totalTokenCount }),
+          }
+        : undefined;
+
       return {
         content,
         model: request.model,
@@ -92,15 +107,7 @@ export class GeminiProvider implements AIProvider {
         ...(gemini.candidates?.[0]?.finishReason
           ? { finishReason: gemini.candidates[0].finishReason }
           : {}),
-        ...(gemini.usageMetadata
-          ? {
-              usage: {
-                promptTokens: gemini.usageMetadata.promptTokenCount,
-                completionTokens: gemini.usageMetadata.candidatesTokenCount,
-                totalTokens: gemini.usageMetadata.totalTokenCount,
-              },
-            }
-          : {}),
+        ...(usage && Object.keys(usage).length > 0 ? { usage } : {}),
       };
     } catch (error) {
       if (error instanceof AIProviderError) throw error;
@@ -136,7 +143,7 @@ async function readJson(response: Response): Promise<unknown> {
   }
 }
 
-function normalizeHttpError(status: number, body: unknown): AIProviderError {
+function normalizeHttpError(status: number, _body: unknown): AIProviderError {
   if (status === 400) {
     return new AIProviderError('Gemini rejected the request.', 'invalid_request', 'gemini');
   }
