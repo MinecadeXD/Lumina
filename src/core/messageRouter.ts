@@ -123,6 +123,7 @@ export class MessageRouter {
 
     this.memoryManager.rememberFromMessage(input.userId, input.content);
     this.memoryManager.forgetFromMessage(input.userId, input.content);
+    this.memoryManager.rememberConservativePreference(input.userId, input.content);
 
     try {
       const response = await this.aiRouter.generate(context);
