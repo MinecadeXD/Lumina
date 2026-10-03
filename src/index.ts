@@ -6,6 +6,7 @@ import { loadEnvironment } from './config/environment.ts';
 import { logger } from './logging/logger.ts';
 import { MessageRouter } from './core/messageRouter.ts';
 import { MemoryManager } from './memory/memoryManager.ts';
+import { SystemPromptBuilder } from './ai/systemPrompt.ts';
 
 async function main():Promise<void>{
   const environment=loadEnvironment(); logger.configure(environment.logLevel); const database=createDatabase();
@@ -14,7 +15,8 @@ async function main():Promise<void>{
   const availableProviders=aiRouter.availableProviders(); if(availableProviders.length===0)logger.warn('No AI provider API keys are configured. AI requests will be unavailable.'); else logger.info('AI providers available: '+availableProviders.join(', '));
   const memoryRepository = new MemoryRepository(database);
   const memoryManager = new MemoryManager(memoryRepository);
-  const messageRouter=new MessageRouter(aiRouter,new ConversationRepository(database),new MessageRepository(database),new SettingsRepository(database),memoryManager,memoryRepository,environment.aiTimeoutMs,
+  const systemPromptBuilder = new SystemPromptBuilder(environment.luminaPersonality);
+  const messageRouter=new MessageRouter(aiRouter,new ConversationRepository(database),new MessageRepository(database),new SettingsRepository(database),systemPromptBuilder,memoryManager,memoryRepository,environment.aiTimeoutMs,
     environment.conversationInactivityMs,
     {
       maxContextTokens: environment.contextMaxTokens,
