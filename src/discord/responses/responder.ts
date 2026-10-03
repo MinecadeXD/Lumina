@@ -1,9 +1,5 @@
 import type { Message, ChatInputCommandInteraction } from 'discord.js';
-import {
-  DISCORD_RESPONSE_LIMIT,
-  DISCORD_RESPONSE_TOO_LONG,
-  formatDiscordResponse,
-} from '../../utils/formatting.ts';
+import { formatDiscordResponse } from '../../utils/formatting.ts';
 
 const ALLOWED_MENTION_POLICY = { parse: ['users', 'roles'] as ('users' | 'roles')[] };
 
@@ -14,10 +10,7 @@ export async function sendTypingIndicator(message: Message): Promise<void> {
 }
 
 export async function respondToMessage(message: Message, content: string): Promise<void> {
-  const formatted = formatDiscordResponse(content);
-  const safeContent = formatted.length <= DISCORD_RESPONSE_LIMIT
-    ? formatted
-    : DISCORD_RESPONSE_TOO_LONG;
+  const safeContent = formatDiscordResponse(content);
 
   await message.reply({
     content: safeContent || 'Lumina did not return a response.',
@@ -29,10 +22,7 @@ export async function respondToInteraction(
   interaction: ChatInputCommandInteraction,
   content: string,
 ): Promise<void> {
-  const formatted = formatDiscordResponse(content);
-  const safeContent = formatted.length <= DISCORD_RESPONSE_LIMIT
-    ? formatted
-    : DISCORD_RESPONSE_TOO_LONG;
+  const safeContent = formatDiscordResponse(content);
 
   if (!interaction.replied && !interaction.deferred) await interaction.deferReply();
 
