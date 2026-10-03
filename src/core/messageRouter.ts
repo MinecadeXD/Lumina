@@ -50,13 +50,17 @@ export class MessageRouter {
     const sharedChannel = input.guildId !== null &&
       this.isDedicatedAIChannel(input.guildId, input.channelId);
 
-    const conversation = this.conversations.getOrCreate({
+    const conversationInput = {
       userId: input.userId,
       channelId: input.channelId,
       guildId: input.guildId,
       sharedChannel,
-      existingConversationId: input.conversationId,
-    });
+      ...(input.conversationId === undefined
+        ? {}
+        : { existingConversationId: input.conversationId }),
+    };
+
+    const conversation = this.conversations.getOrCreate(conversationInput);
 
     const context = this.contextBuilder.build(conversation.id, input.content);
 
