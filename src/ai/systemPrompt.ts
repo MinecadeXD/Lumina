@@ -17,7 +17,7 @@ const LUMINA_BEHAVIOR = [
 
 export class SystemPromptBuilder {
   public constructor(
-    private readonly defaultPersonality = defaults.luminaPersonality,
+    private readonly defaultPersonality: string = defaults.luminaPersonality,
   ) {}
 
   public build(serverInstructions?: string | null): string {
