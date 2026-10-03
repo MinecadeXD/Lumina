@@ -1,5 +1,9 @@
 import type { Message, ChatInputCommandInteraction } from 'discord.js';
-import { splitDiscordMessage } from '../../utils/formatting.ts';
+import {
+  DISCORD_RESPONSE_LIMIT,
+  DISCORD_RESPONSE_TOO_LONG,
+  formatDiscordResponse,
+} from '../../utils/formatting.ts';
 
 const SAFE_MENTION_POLICY = { parse: [] as ('users' | 'roles' | 'everyone')[] };
 
@@ -10,30 +14,32 @@ export async function sendTypingIndicator(message: Message): Promise<void> {
 }
 
 export async function respondToMessage(message: Message, content: string): Promise<void> {
-  const chunks = splitDiscordMessage(content);
-  for (const chunk of chunks) {
-    await message.reply({
-      content: chunk,
-      allowedMentions: { ...SAFE_MENTION_POLICY, repliedUser: false },
-    });
-  }
+  const formatted = formatDiscordResponse(content);
+  const safeContent = formatted.length <= DISCORD_RESPONSE_LIMIT
+    ? formatted
+    : DISCORD_RESPONSE_TOO_LONG;
+
+  await message.reply({
+    content: safeContent || 'Lumina did not return a response.',
+    allowedMentions: { ...SAFE_MENTION_POLICY, repliedUser: false },
+  });
 }
 
 export async function respondToInteraction(
   interaction: ChatInputCommandInteraction,
   content: string,
 ): Promise<void> {
-  const chunks = splitDiscordMessage(content);
+  const formatted = formatDiscordResponse(content);
+  const safeContent = formatted.length <= DISCORD_RESPONSE_LIMIT
+    ? formatted
+    : DISCORD_RESPONSE_TOO_LONG;
+
   if (!interaction.replied && !interaction.deferred) await interaction.deferReply();
 
   await interaction.editReply({
-    content: chunks[0] ?? 'Lumina did not return a response.',
+    content: safeContent || 'Lumina did not return a response.',
     allowedMentions: SAFE_MENTION_POLICY,
   });
-
-  for (const chunk of chunks.slice(1)) {
-    await interaction.followUp({ content: chunk, allowedMentions: SAFE_MENTION_POLICY });
-  }
 }
 
 export async function respondToError(
