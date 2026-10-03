@@ -27,6 +27,15 @@ export class MemoryManager {
     return true;
   }
 
+  public rememberConservativePreference(userId: string, content: string): boolean {
+    const match = content.match(/^\s*(?:i prefer|i use|my favorite)\s+(.+)$/i);
+    if (!match) return false;
+    const value = match[0].trim();
+    if (value.length > 200) return false;
+    this.add(userId, value);
+    return true;
+  }
+
   public forgetFromMessage(userId: string, content: string): boolean {
     const match = content.match(/^\s*(?:forget that|forget|don't remember that|do not remember that)\s+(.+)$/i);
     if (!match) return false;
