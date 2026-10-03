@@ -69,6 +69,21 @@ export abstract class OpenAICompatibleProvider implements AIProvider {
         );
       }
 
+      const rawUsage = data.usage;
+      const usage = rawUsage
+        ? {
+            ...(rawUsage.prompt_tokens === undefined
+              ? {}
+              : { promptTokens: rawUsage.prompt_tokens }),
+            ...(rawUsage.completion_tokens === undefined
+              ? {}
+              : { completionTokens: rawUsage.completion_tokens }),
+            ...(rawUsage.total_tokens === undefined
+              ? {}
+              : { totalTokens: rawUsage.total_tokens }),
+          }
+        : undefined;
+
       return {
         content,
         model: data.model ?? request.model,
@@ -76,15 +91,7 @@ export abstract class OpenAICompatibleProvider implements AIProvider {
         ...(data.choices?.[0]?.finish_reason
           ? { finishReason: data.choices[0].finish_reason }
           : {}),
-        ...(data.usage
-          ? {
-              usage: {
-                promptTokens: data.usage.prompt_tokens,
-                completionTokens: data.usage.completion_tokens,
-                totalTokens: data.usage.total_tokens,
-              },
-            }
-          : {}),
+        ...(usage && Object.keys(usage).length > 0 ? { usage } : {}),
       };
     } catch (error) {
       if (error instanceof AIProviderError) throw error;
