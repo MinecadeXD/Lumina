@@ -62,7 +62,7 @@ export class ContextBuilder {
       contextMessages.splice(removableIndex, 1);
     }
 
-    return { model: '', messages: [...contextMessages, current], timeoutMs };
+    return {\n      model: '',\n      messages: [...contextMessages, current],\n      maxTokens: 450,\n      timeoutMs,\n    };
   }
 
   private buildMemoryContext(memories: readonly MemoryRecord[]): string {
