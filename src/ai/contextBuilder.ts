@@ -1,7 +1,7 @@
 import type { AIRequest } from './provider.ts';
-import { MessageRepository, ConversationRepository, MemoryRepository, SettingsRepository } from '../database/index.ts';
+import { MessageRepository, ConversationRepository, MemoryRepository } from '../database/index.ts';
 import type { MemoryRecord } from '../database/repositories/memories.ts';
-import { SERVER_PERSONALITY_SETTING_KEY, SystemPromptBuilder } from './systemPrompt.ts';
+import { SystemPromptBuilder } from './systemPrompt.ts';
 import { getResponseLengthInstruction } from '../core/requestPolicy.ts';
 
 export interface ContextBuilderOptions {
@@ -18,7 +18,6 @@ export class ContextBuilder {
     private readonly messages: MessageRepository,
     private readonly conversations: ConversationRepository,
     private readonly memories: MemoryRepository,
-    private readonly settings: SettingsRepository,
     private readonly systemPromptBuilder: SystemPromptBuilder,
     private readonly options: ContextBuilderOptions,
   ) {}
@@ -38,14 +37,11 @@ export class ContextBuilder {
       ? []
       : this.memories.listByUser(userId, this.options.maxMemories);
     const memoryText = this.buildMemoryContext(userMemories);
-    const serverInstructions = conversation?.guildId
-      ? this.settings.get('guild', conversation.guildId, SERVER_PERSONALITY_SETTING_KEY)?.value
-      : null;
 
     const contextMessages = [
       {
         role: 'system' as const,
-        content: this.systemPromptBuilder.build(serverInstructions) + '\n\nResponse policy: ' + getResponseLengthInstruction(),
+        content: this.systemPromptBuilder.build() + '\n\nResponse policy: ' + getResponseLengthInstruction(),
       },
       ...(summary ? [{ role: 'system' as const, content: 'Conversation summary:\n' + summary }] : []),
       ...(memoryText ? [{ role: 'system' as const, content: 'Relevant long-term memories for this user:\n' + memoryText }] : []),
