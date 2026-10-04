@@ -69,7 +69,7 @@ async function main(): Promise<void> {
   );
 
   const client = createDiscordClient();
-  registerDiscordEvents(client, messageRouter, memoryManager);
+  registerDiscordEvents(client, messageRouter, memoryManager, environment);
 
   let shuttingDown = false;
   const shutdown = async (signal: NodeJS.Signals): Promise<void> => {
