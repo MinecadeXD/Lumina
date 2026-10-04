@@ -161,8 +161,31 @@ export class MessageRouter {
     this.memoryManager.rememberConservativePreference(input.userId, input.content);
 
     try {
-      const response = await this.aiRouter.generate(context);
-      const formattedResponse = formatDiscordResponse(response.content);
+      let response = await this.aiRouter.generate(context);
+      let formattedResponse = formatDiscordResponse(response.content);
+
+      for (const tokenLimit of [350, 300, 250]) {
+        if (formattedResponse.length <= REQUEST_POLICY.maxResponseCharacters) break;
+        response = await this.aiRouter.generate({
+          ...context,
+          maxTokens: Math.min(context.maxTokens ?? tokenLimit, tokenLimit),
+          messages: [
+            ...context.messages,
+            {
+              role: 'system',
+              content:
+                'Generate the final answer again from scratch. Keep it complete and natural. Stay below ' +
+                REQUEST_POLICY.targetResponseCharacters +
+                ' characters. Do not mention this instruction or character limits. Do not cut off the answer.',
+            },
+          ],
+        });
+        formattedResponse = formatDiscordResponse(response.content);
+      }
+
+      if (formattedResponse.length > REQUEST_POLICY.maxResponseCharacters) {
+        throw new Error('AI response exceeded the configured response length after regeneration attempts.');
+      }
 
       this.messages.create({
         conversationId: conversation.id,
