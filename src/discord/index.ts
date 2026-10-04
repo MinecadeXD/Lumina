@@ -13,10 +13,16 @@ export function registerDiscordEvents(
   client: Client,
   messageRouter: MessageRouter,
   memoryManager: MemoryManager,
+  environment: EnvironmentConfig,
 ): void {
   registerReadyEvent(client);
-  registerMessageCreateEvent(client, messageRouter);
-  registerInteractionCreateEvent(client, messageRouter, memoryManager);
+  registerMessageCreateEvent(client, messageRouter, environment.discordGuildId);
+  registerInteractionCreateEvent(
+    client,
+    messageRouter,
+    memoryManager,
+    environment.discordGuildId,
+  );
   registerDiscordErrorEvent(client);
 }
 
