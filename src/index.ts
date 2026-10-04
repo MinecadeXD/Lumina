@@ -26,6 +26,7 @@ async function main():Promise<void>{
       summarySourceMessages: environment.summarySourceMessages,
       summaryRecentMessagesToKeep: environment.summaryRecentMessagesToKeep,
       summaryMaxTokens: environment.summaryMaxTokens,
+      maxOutputTokens: environment.aiMaxOutputTokens,
     },
   );
   const client=createDiscordClient(); registerDiscordEvents(client,messageRouter,memoryManager); let shuttingDown=false;
