@@ -32,6 +32,7 @@ export interface MessageContextOptions {
   summarySourceMessages: number;
   summaryRecentMessagesToKeep: number;
   summaryMaxTokens: number;
+  maxOutputTokens: number;
 }
 
 export class MessageRouter {
@@ -59,6 +60,7 @@ export class MessageRouter {
       summarySourceMessages: 60,
       summaryRecentMessagesToKeep: 12,
       summaryMaxTokens: 700,
+      maxOutputTokens: 450,
     },
   ) {
     this.memoryManager = memoryManager;
@@ -70,6 +72,7 @@ export class MessageRouter {
       maxContextTokens: contextOptions.maxContextTokens,
       recentMessages: contextOptions.recentMessages,
       maxSummaryTokens: contextOptions.maxSummaryTokens,
+      maxOutputTokens: contextOptions.maxOutputTokens,
       maxMemories: 20,
       maxMemoryTokens: 1000,
     });
