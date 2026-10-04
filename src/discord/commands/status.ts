@@ -9,16 +9,15 @@ export const statusCommand: Command = {
     .setDescription('Show safe Lumina diagnostics.'),
 
   async execute(interaction: ChatInputCommandInteraction, messageRouter: MessageRouter) {
-    const status = messageRouter.getStatus(interaction.guildId);
+    const status = messageRouter.getStatus();
     const discordStatus = interaction.client.isReady() ? 'online' : 'not ready';
-    const model = status.model ?? 'not configured';
     const providerState = status.providerAvailable ? 'available' : 'unavailable';
 
     const lines = [
       '**Lumina Status**',
       'Lumina: ' + discordStatus,
       'AI provider: ' + status.provider + ' (' + providerState + ')',
-      'Model: ' + model,
+      'Model: ' + status.model,
       'Database: ' + (status.databaseHealthy ? 'healthy' : 'unavailable'),
       'AI channel only: ' + (status.aiChannelOnly ? 'enabled' : 'disabled'),
       'AI role restriction: ' + (status.aiRoleConfigured ? 'enabled' : 'disabled'),
@@ -28,11 +27,10 @@ export const statusCommand: Command = {
     if (status.aiChannel) lines.push('Dedicated AI channel: <#' + status.aiChannel + '>');
     lines.push(
       'Rate limits: user ' + status.rateLimits.user +
-      ', server ' + status.rateLimits.server +
       ', provider ' + status.rateLimits.provider +
       ' per ' + status.rateLimits.windowSeconds + 's',
     );
 
-    await interaction.reply({content: lines.join('\n'), ephemeral: true});
+    await interaction.reply({ content: lines.join('\n'), ephemeral: true });
   },
 };
