@@ -23,7 +23,7 @@ function normalizeDiscordFormatting(content: string): string {
       return part
         .replace(/^#{1,6}\s+(.+)$/gm, '**$1**')
         .replace(/^(\s*)[*-]\s+/gm, '$1• ')
-        .replace(/\$\$([\s\S]*?)\$\$/g, '$1')
+        .replace(/\$\$([\s\\S]*?)\$\$/g, '$1')
         .replace(/\$([^$\n]+)\$/g, '$1');
     })
     .join('');
@@ -31,24 +31,31 @@ function normalizeDiscordFormatting(content: string): string {
 
 function truncateDiscordResponse(content: string): string {
   const closingFence = '\n```';
-  const hasUnclosedCodeBlock = (content.match(/```/g)?.length ?? 0) % 2 === 1;
-  const limit = hasUnclosedCodeBlock
-    ? DISCORD_RESPONSE_LIMIT - closingFence.length
-    : DISCORD_RESPONSE_LIMIT;
+  let cutAt = DISCORD_RESPONSE_LIMIT;
 
-  let cutAt = limit;
-  const newline = content.lastIndexOf('\n', limit);
-  const space = content.lastIndexOf(' ', limit);
+  const newline = content.lastIndexOf('\n', cutAt);
+  const space = content.lastIndexOf(' ', cutAt);
   const naturalBreak = Math.max(newline, space);
 
-  if (naturalBreak > Math.floor(limit * 0.75)) {
+  if (naturalBreak > Math.floor(cutAt * 0.75)) {
     cutAt = naturalBreak;
   }
 
   let truncated = content.slice(0, cutAt).trimEnd();
+  const isInsideCodeBlock =
+    (truncated.match(/```/g)?.length ?? 0) % 2 === 1;
 
-  if (hasUnclosedCodeBlock) {
-    truncated += closingFence;
+  if (isInsideCodeBlock) {
+    cutAt = DISCORD_RESPONSE_LIMIT - closingFence.length;
+    const codeNewline = content.lastIndexOf('\n', cutAt);
+    const codeSpace = content.lastIndexOf(' ', cutAt);
+    const codeBreak = Math.max(codeNewline, codeSpace);
+
+    if (codeBreak > Math.floor(cutAt * 0.75)) {
+      cutAt = codeBreak;
+    }
+
+    truncated = content.slice(0, cutAt).trimEnd() + closingFence;
   }
 
   return truncated;
