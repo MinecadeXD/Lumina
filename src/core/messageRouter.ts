@@ -9,6 +9,7 @@ import { ContextBuilder } from '../ai/contextBuilder.ts';
 import { formatDiscordResponse } from '../utils/formatting.ts';
 import type { SystemPromptBuilder } from '../ai/systemPrompt.ts';
 import { SERVER_PERSONALITY_SETTING_KEY } from '../ai/systemPrompt.ts';
+import { isCodeGenerationRequest, REQUEST_POLICY } from './requestPolicy.ts';
 
 export interface MessageRouterInput {
   content: string;
@@ -128,6 +129,14 @@ export class MessageRouter {
   public async process(input: MessageRouterInput): Promise<MessageRouterResult> {
     if (!this.permissions.canUseAI(input.userId, input.guildId)) {
       throw new Error('You do not have permission to use Lumina.');
+    }
+
+    if (isCodeGenerationRequest(input.content)) {
+      return {
+        content: REQUEST_POLICY.codeGenerationRefusal,
+        conversationId: -1,
+        provider: 'policy',
+      };
     }
 
     const conversation = this.conversations.getOrCreate(
