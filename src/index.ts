@@ -7,7 +7,7 @@ import { logger } from './logging/logger.ts';
 import { MessageRouter } from './core/messageRouter.ts';
 import { MemoryManager } from './memory/memoryManager.ts';
 import { SystemPromptBuilder } from './ai/systemPrompt.ts';
-import { ConfigurationError, safeErrorMessage } from './utils/errors.ts';
+import { safeErrorMessage } from './utils/errors.ts';
 
 async function main(): Promise<void> {
   const environment = loadEnvironment();
