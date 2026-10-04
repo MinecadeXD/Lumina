@@ -60,8 +60,8 @@ export class MessageRouter {
     if(!this.permissions.isAIChannelAllowed(input.guildId,input.channelId))throw new Error('Lumina is restricted to the configured AI channel on this server.');
     if(isCodeGenerationRequest(input.content))return {content:REQUEST_POLICY.codeGenerationRefusal,conversationId:-1,provider:'policy'};
     const limits=input.guildId?this.getRateLimits(input.guildId):{user:10,server:100,provider:60,windowSeconds:3600};
-    if(!this.rateLimiter.checkUser(input.userId,limits.user))throw new Error('You are sending requests too quickly. Please try again later.');
-    if(input.guildId&&!this.rateLimiter.checkServer(input.guildId,limits.server))throw new Error('This server has reached Lumina\'s request limit. Please try again later.');
+    if(!this.rateLimiter.checkUser(input.userId,limits.user,limits.windowSeconds*1000))throw new Error('You are sending requests too quickly. Please try again later.');
+    if(input.guildId&&!this.rateLimiter.checkServer(input.guildId,limits.server,limits.windowSeconds*1000))throw new Error('This server has reached Lumina\'s request limit. Please try again later.');
     const preferredProvider=input.guildId?this.getAIProvider(input.guildId):null;
     const preferredModel=input.guildId?this.getAIModel(input.guildId):null;
     if(preferredProvider&& !this.aiRouter.getProvider(preferredProvider))throw new Error('The configured AI provider is not available.');
@@ -69,9 +69,9 @@ export class MessageRouter {
     const context=this.contextBuilder.build(conversation.id,input.userId,input.content,this.aiTimeoutMs);
     this.messages.create({conversationId:conversation.id,userId:input.userId,role:'user',content:input.content});
     if(this.getMemoryBehavior(input.guildId)==='conservative'){this.memoryManager.rememberFromMessage(input.userId,input.content);this.memoryManager.forgetFromMessage(input.userId,input.content);this.memoryManager.rememberConservativePreference(input.userId,input.content);}
-    const providerAllowed=(provider:string)=>this.rateLimiter.checkProvider(provider,limits.provider);
-    const recordProvider=(provider:string)=>{this.rateLimiter.recordProvider(provider);};
-    this.rateLimiter.recordUser(input.userId); if(input.guildId)this.rateLimiter.recordServer(input.guildId);
+    const providerAllowed=(provider:string)=>this.rateLimiter.checkProvider(provider,limits.provider,limits.windowSeconds*1000);
+    const recordProvider=(provider:string)=>{this.rateLimiter.recordProvider(provider,limits.windowSeconds*1000);};
+    this.rateLimiter.recordUser(input.userId,limits.windowSeconds*1000); if(input.guildId)this.rateLimiter.recordServer(input.guildId,limits.windowSeconds*1000);
     try{
       let response=await this.aiRouter.generate(context,{preferredProvider:preferredProvider??undefined,preferredModel:preferredModel??undefined,isProviderAllowed:providerAllowed,onProviderRequest:recordProvider});
       let formattedResponse=formatDiscordResponse(response.content);
