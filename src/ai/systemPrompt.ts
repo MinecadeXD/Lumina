@@ -1,4 +1,5 @@
 import { defaults } from '../config/defaults.ts';
+import { getResponseLengthInstruction } from '../core/requestPolicy.ts';
 
 export const SERVER_PERSONALITY_SETTING_KEY = 'lumina_personality';
 
@@ -16,8 +17,8 @@ const LUMINA_BEHAVIOR = [
   'Do not use Markdown headings such as #, ##, or ###. Use bold text for section labels instead.',
   'Do not use asterisks or hyphens as unordered-list markers; use short paragraphs or simple bullet points when needed.',
   'Do not use LaTeX math delimiters such as $...$ or $$...$$ for ordinary Discord responses. Write equations and chemical formulas as plain text or Unicode notation, such as H₂O, CO₂, and C₆H₁₂O₆.',
-  'Keep every user-facing response under 1900 characters so it fits safely in one Discord message.',
-  'If a response would exceed the limit, prioritize the most useful information and finish naturally rather than mentioning the character limit or asking the user to split the request.',
+  'Never generate, modify, or debug code, source code, scripts, implementations, or code files. If the user asks directly or indirectly for code, refuse briefly and offer a conceptual explanation instead.',
+  getResponseLengthInstruction(),
 ];
 
 export class SystemPromptBuilder {
