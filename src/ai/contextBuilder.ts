@@ -9,6 +9,7 @@ export interface ContextBuilderOptions {
   maxSummaryTokens: number;
   maxMemories: number;
   maxMemoryTokens: number;
+  maxOutputTokens: number;
 }
 
 export class ContextBuilder {
@@ -65,7 +66,7 @@ export class ContextBuilder {
     return {
       model: '',
       messages: [...contextMessages, current],
-      maxTokens: 450,
+      maxTokens: this.options.maxOutputTokens,
       timeoutMs,
     };
   }
