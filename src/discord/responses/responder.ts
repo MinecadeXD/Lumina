@@ -1,5 +1,6 @@
 import type { Message, ChatInputCommandInteraction } from 'discord.js';
 import { formatDiscordResponse } from '../../utils/formatting.ts';
+import { safeErrorMessage } from '../../utils/errors.ts';
 
 const ALLOWED_MENTION_POLICY = { parse: ['users', 'roles'] as ('users' | 'roles')[] };
 
@@ -32,11 +33,8 @@ export async function respondToInteraction(
   });
 }
 
-export async function respondToError(
-  message: Message,
-  content = 'Lumina could not process that request.',
-): Promise<void> {
-  await respondToMessage(message, content);
+export async function respondToError(message: Message, content = 'Lumina could not process that request.'): Promise<void> {
+  await respondToMessage(message, safeErrorMessage(content));
 }
 
 export const discordErrorResponse = {
