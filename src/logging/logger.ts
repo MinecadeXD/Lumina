@@ -1,4 +1,5 @@
 import type { LogLevel } from "../config/defaults.ts";
+import { redactSecrets } from "../utils/errors.ts";
 
 const levelPriority: Record<LogLevel, number> = {
   debug: 10,
@@ -22,7 +23,7 @@ function write(level: LogLevel, message: string, details?: unknown): void {
     return;
   }
 
-  console.log(prefix + " " + message, details);
+  console.log(prefix + " " + String(redactSecrets(message)), redactSecrets(details));
 }
 
 export const logger = {
