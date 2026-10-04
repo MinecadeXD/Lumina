@@ -52,9 +52,8 @@ export const clearCommand: Command = {
     }
 
     if (subcommand === 'memory') {
-      const result = messageRouter.resetUserData('__unused__');
-      void result;
-      await interaction.reply({content: 'Use /memory clear to clear saved memories.', ephemeral: true});
+      const count = messageRouter.clearUserMemories(interaction.user.id);
+      await interaction.reply({content: count > 0 ? 'Cleared ' + count + ' saved memor' + (count === 1 ? 'y.' : 'ies.') : 'You had no saved memories to clear.', ephemeral: true});
       return;
     }
 
