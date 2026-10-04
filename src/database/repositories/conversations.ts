@@ -33,6 +33,7 @@ export class ConversationRepository {
   public touch(id:number):void { const now=new Date().toISOString(); this.database.prepare("UPDATE conversations SET updated_at=?,last_activity_at=?,status='active' WHERE id=?").run(now,now,id); }
   public updateSummary(id:number,summary:string|null,summaryMessageCount:number):void { this.database.prepare('UPDATE conversations SET summary=?,summary_message_count=?,updated_at=? WHERE id=?').run(summary,summaryMessageCount,new Date().toISOString(),id); }
   public delete(id:number):boolean { return this.database.prepare('DELETE FROM conversations WHERE id=?').run(id).changes>0; }
+  public deleteAllForUser(userId:string):number { return this.database.prepare('DELETE FROM conversations WHERE user_id=?').run(userId).changes; }
   private map(row:RawConversation):ConversationRecord { return {id:row.id,scopeType:row.scope_type as ConversationScope,status:row.status as ConversationStatus,userId:row.user_id,channelId:row.channel_id,guildId:row.guild_id,summary:row.summary,summaryMessageCount:row.summary_message_count,createdAt:row.created_at,updatedAt:row.updated_at,lastActivityAt:row.last_activity_at}; }
 }
 interface RawConversation { id:number;scope_type:string;status:string;user_id:string|null;channel_id:string|null;guild_id:string|null;summary:string|null;summary_message_count:number;created_at:string;updated_at:string;last_activity_at:string; }
