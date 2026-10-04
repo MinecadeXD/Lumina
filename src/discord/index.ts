@@ -6,7 +6,6 @@ import { registerDiscordErrorEvent } from './events/error.ts';
 import { registerMessageCreateEvent } from './events/messageCreate.ts';
 import { registerReadyEvent } from './events/ready.ts';
 import type { EnvironmentConfig } from '../config/environment.ts';
-import type { MessageRouter } from '../core/messageRouter.ts';
 import type { MemoryManager } from '../memory/memoryManager.ts';
 
 export function registerDiscordEvents(
@@ -27,9 +26,8 @@ export function registerDiscordEvents(
 }
 
 export async function initializeDiscord(
-  client: Client,
+  _client: Client,
   environment: EnvironmentConfig,
-  _messageRouter: MessageRouter,
 ): Promise<void> {
   await registerCommands(environment, loadCommands());
 }
