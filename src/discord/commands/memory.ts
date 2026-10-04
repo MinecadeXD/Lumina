@@ -9,7 +9,7 @@ export const memoryCommand: Command = {
     .setDescription('Manage Lumina memories about you.')
     .addSubcommand((subcommand) => subcommand.setName('list').setDescription('List your saved memories.'))
     .addSubcommand((subcommand) => subcommand.setName('add').setDescription('Remember something about you.').addStringOption((option) => option.setName('text').setDescription('The information Lumina should remember.').setRequired(true)))
-    .addSubcommand((subcommand) => subcommand.setName('remove').setDescription('Forget one of your memories.').addIntegerOption((option) => option.setName('id').setDescription('Memory ID from /memory list.').setRequired(true).setMinValue(1)))
+    .addSubcommand((subcommand) => subcommand.setName('remove').setDescription('Forget one of your memories.').addIntegerOption((option) => option.setName('id').setDescription('Memory ID from /memory list.').setRequired(true).setMinValue(1)).addBooleanOption((option) => option.setName('confirm').setDescription('Confirm deletion.').setRequired(true)))
     .addSubcommand((subcommand) => subcommand.setName('clear').setDescription('Forget all of your saved memories.').addBooleanOption((option) => option.setName('confirm').setDescription('Confirm deleting all memories.').setRequired(true))),
   async execute(interaction: ChatInputCommandInteraction, _messageRouter, memoryManager: MemoryManager) {
     const subcommand = interaction.options.getSubcommand();
@@ -26,6 +26,7 @@ export const memoryCommand: Command = {
     }
     if (subcommand === 'remove') {
       const id = interaction.options.getInteger('id', true);
+      if (!interaction.options.getBoolean('confirm', true)) { await interaction.reply({ content: 'Memory was not removed. Set confirm to true to delete it.', ephemeral: true }); return; }
       const removed = memoryManager.remove(userId, id);
       await interaction.reply({ content: removed ? 'Forgot memory #' + id + '.' : 'Memory #' + id + ' was not found in your memories.', ephemeral: true }); return;
     }
