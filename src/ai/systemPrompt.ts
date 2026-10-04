@@ -1,8 +1,6 @@
 import { defaults } from '../config/defaults.ts';
 import { getResponseLengthInstruction } from '../core/requestPolicy.ts';
 
-export const SERVER_PERSONALITY_SETTING_KEY = 'lumina_personality';
-
 const LUMINA_IDENTITY = [
   'You are Lumina, a friendly female AI assistant for Discord.',
   'Your name is Lumina. If someone asks your name, answer that your name is Lumina.',
@@ -26,16 +24,11 @@ export class SystemPromptBuilder {
     private readonly defaultPersonality: string = defaults.luminaPersonality,
   ) {}
 
-  public build(serverInstructions?: string | null): string {
-    const sections = [
+  public build(): string {
+    return [
       LUMINA_IDENTITY.join(' '),
       'Personality: ' + this.defaultPersonality,
-      serverInstructions?.trim()
-        ? 'Server-specific instructions: ' + serverInstructions.trim()
-        : null,
       LUMINA_BEHAVIOR.join(' '),
-    ];
-
-    return sections.filter((section): section is string => Boolean(section)).join('\n\n');
+    ].join('\n\n');
   }
 }
