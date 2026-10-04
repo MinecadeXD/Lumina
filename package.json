@@ -1,6 +1,6 @@
 {
   "name": "lumina",
-  "version": "0.1.0",
+  "version": "1.7.2",
   "private": true,
   "description": "Self-hosted AI Discord chatbot.",
   "type": "module",
