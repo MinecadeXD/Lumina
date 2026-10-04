@@ -5,4 +5,4 @@ export { GeminiProvider } from './providers/gemini.ts';
 export { GroqProvider } from './providers/groq.ts';
 export { OpenRouterProvider } from './providers/openrouter.ts';
 export { ConversationSummarizer } from './summarizer.ts';
-export { SystemPromptBuilder, SERVER_PERSONALITY_SETTING_KEY } from './systemPrompt.ts';
+export { SystemPromptBuilder } from './systemPrompt.ts';
