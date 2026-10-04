@@ -9,15 +9,13 @@ export async function registerCommands(
 ): Promise<void> {
   const rest = new REST({ version: '10' }).setToken(environment.discordToken);
   const body = commands.map((command) => command.data.toJSON());
-
-  const route = environment.discordGuildId
-    ? Routes.applicationGuildCommands(environment.discordClientId, environment.discordGuildId)
-    : Routes.applicationCommands(environment.discordClientId);
+  const route = Routes.applicationGuildCommands(
+    environment.discordClientId,
+    environment.discordGuildId,
+  );
 
   logger.info(
-    environment.discordGuildId
-      ? `Registering ${body.length} guild slash command(s).`
-      : `Registering ${body.length} global slash command(s).`,
+    `Registering ${body.length} guild slash command(s) for the configured Lumina server.`,
   );
 
   await rest.put(route, { body });
