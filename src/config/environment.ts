@@ -14,6 +14,7 @@ export interface EnvironmentConfig {
 function requireValue(name:string):string { const value=process.env[name]?.trim(); if(!value)throw new ConfigurationError(`Missing required environment variable: ${name}`); return value; }
 function parseProvider(value:string,name:string):AIProviderName { if(value==='gemini'||value==='groq'||value==='openrouter')return value; throw new ConfigurationError(`Invalid ${name} "${value}". Expected gemini, groq, or openrouter.`); }
 function parseProviders(value:string|undefined,name:string):AIProviderName[] { if(!value?.trim())return []; return value.split(',').map((provider)=>parseProvider(provider.trim(),name)); }
+function parseBoolean(value:string|undefined,name:string,fallback:boolean):boolean { if(!value?.trim())return fallback; const normalized=value.trim().toLowerCase(); if(normalized==='true')return true; if(normalized==='false')return false; throw new ConfigurationError(`${name} must be true or false.`); }
 function parsePositiveInteger(value:string|undefined,name:string,fallback:number):number { if(!value?.trim())return fallback; const parsed=Number(value); if(!Number.isInteger(parsed)||parsed<=0)throw new ConfigurationError(`${name} must be a positive integer.`); return parsed; }
 export function loadEnvironment():EnvironmentConfig {
   const nodeEnv=process.env.NODE_ENV?.trim()||defaults.nodeEnv; const rawLogLevel=process.env.LOG_LEVEL?.trim()||defaults.logLevel;
