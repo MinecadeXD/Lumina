@@ -88,7 +88,7 @@ async function main(): Promise<void> {
   process.once('SIGTERM', () => void shutdown('SIGTERM'));
 
   try {
-    await initializeDiscord(client, environment, messageRouter);
+    await initializeDiscord(client, environment);
     await client.login(environment.discordToken);
   } catch (error) {
     logger.fatal(safeErrorMessage(error));
