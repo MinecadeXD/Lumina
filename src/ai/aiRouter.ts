@@ -21,6 +21,8 @@ export class AIRouter {
   public register(provider: AIProvider): void { this.providers.set(provider.name, provider); }
   public getProvider(name: string): AIProvider | undefined { return this.providers.get(name); }
   public availableProviders(): string[] { return [...this.providers.values()].filter((p) => p.isAvailable()).map((p) => p.name); }
+  public getDefaultProvider(): string { return this.options.primary; }
+  public getDefaultModel(provider: string): string | null { return this.options.models?.[provider] ?? null; }
 
   public async generate(request: AIRequest, overrides: AIRouterGenerateOptions = {}): Promise<AIResponse> {
     const primary = overrides.preferredProvider ?? this.options.primary;
