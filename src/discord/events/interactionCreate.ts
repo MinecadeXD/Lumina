@@ -9,11 +9,13 @@ export function registerInteractionCreateEvent(
   client: Client,
   messageRouter: MessageRouter,
   memoryManager: MemoryManager,
+  allowedGuildId: string,
 ): void {
   const commands = loadCommands();
 
   client.on('interactionCreate', async (interaction: Interaction) => {
     if (!interaction.isChatInputCommand()) return;
+    if (interaction.guildId !== allowedGuildId) return;
 
     const command = commands.find(({ data }) => data.name === interaction.commandName);
     if (!command) {
