@@ -10,7 +10,7 @@ export const askCommand: Command = {
     await interaction.deferReply();
     const content=interaction.options.getString('message',true);
     const member=interaction.member;
-    const result=await messageRouter.process({content,userId:interaction.user.id,channelId:interaction.channelId,guildId:interaction.guildId,permissionContext:{isAdministrator:interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)??false,roleIds:member&&'roles' in member?member.roles.map((role)=>role.id):[]}});
+    const result=await messageRouter.process({content,userId:interaction.user.id,channelId:interaction.channelId,guildId:interaction.guildId,permissionContext:{isAdministrator:interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)??false,roleIds:member&&'roles' in member?(Array.isArray(member.roles)?member.roles:member.roles.cache.map((role)=>role.id)):[]}});
     await respondToInteraction(interaction,result.content);
   },
 };
