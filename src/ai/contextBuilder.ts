@@ -2,6 +2,7 @@ import type { AIRequest } from './provider.ts';
 import { MessageRepository, ConversationRepository, MemoryRepository, SettingsRepository } from '../database/index.ts';
 import type { MemoryRecord } from '../database/repositories/memories.ts';
 import { SERVER_PERSONALITY_SETTING_KEY, SystemPromptBuilder } from './systemPrompt.ts';
+import { getResponseLengthInstruction } from '../core/requestPolicy.ts';
 
 export interface ContextBuilderOptions {
   maxContextTokens: number;
@@ -44,7 +45,7 @@ export class ContextBuilder {
     const contextMessages = [
       {
         role: 'system' as const,
-        content: this.systemPromptBuilder.build(serverInstructions),
+        content: this.systemPromptBuilder.build(serverInstructions) + '\n\nResponse policy: ' + getResponseLengthInstruction(),
       },
       ...(summary ? [{ role: 'system' as const, content: 'Conversation summary:\n' + summary }] : []),
       ...(memoryText ? [{ role: 'system' as const, content: 'Relevant long-term memories for this user:\n' + memoryText }] : []),
