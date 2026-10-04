@@ -274,17 +274,6 @@ export class MessageRouter {
     return this.conversations.clearCurrent(this.toConversationInput(input));
   }
 
-  public clearUserMemories(userId: string): number {
-    return this.memoryManager.clear(userId);
-  }
-
-  public resetUserData(userId: string): { conversations: number; memories: number } {
-    return {
-      conversations: this.conversationRepository.deleteAllForUser(userId),
-      memories: this.memoryRepository.deleteAllForUser(userId),
-    };
-  }
-
   public getStatus() {
     const provider = this.aiRouter.getDefaultProvider();
 
