@@ -11,7 +11,6 @@ const CODE_ARTIFACT_PATTERN = /(?:^|[\s`])(?:python|javascript|typescript|java|k
 export function isCodeGenerationRequest(content: string): boolean {
   const normalized = content.trim();
   if (!normalized) return false;
-  if (/```/.test(normalized)) return true;
   const asksForAction = CODE_ACTION_PATTERN.test(normalized);
   const asksForModification = CODE_MODIFICATION_PATTERN.test(normalized);
   const containsArtifact = CODE_ARTIFACT_PATTERN.test(normalized);
