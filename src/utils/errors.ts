@@ -1,5 +1,24 @@
-export class ConfigurationError extends Error {
-  public constructor(message: string) { super(message); this.name = 'ConfigurationError'; }
+export class AppError extends Error {
+  public readonly cause?: unknown;
+  public constructor(message: string, cause?: unknown) {
+    super(message);
+    this.name = 'AppError';
+    this.cause = cause;
+  }
+}
+
+export class ConfigurationError extends AppError {
+  public constructor(message: string, cause?: unknown) {
+    super(message, cause);
+    this.name = 'ConfigurationError';
+  }
+}
+
+export class DatabaseError extends AppError {
+  public constructor(message: string, cause?: unknown) {
+    super(message, cause);
+    this.name = 'DatabaseError';
+  }
 }
 
 const SECRET_KEY_PATTERN = /(token|api[_-]?key|authorization|password|secret|credential)/i;
