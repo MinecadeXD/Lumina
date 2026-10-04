@@ -35,6 +35,6 @@ export class SystemPromptBuilder {
       LUMINA_BEHAVIOR.join(' '),
     ];
 
-    return sections.filter((section): section is string => Boolean(section)).join('\\n\\n');
+    return sections.filter((section): section is string => Boolean(section)).join('\n\n');
   }
 }
