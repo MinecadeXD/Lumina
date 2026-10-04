@@ -12,6 +12,15 @@ export interface SettingRecord {
 export class SettingsRepository {
   public constructor(private readonly database: SQLiteDatabase) {}
 
+  public isHealthy(): boolean {
+    try {
+      this.database.prepare('SELECT 1 AS ok').get();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   public get(scopeType: string, scopeId: string, key: string): SettingRecord | null {
     const row = this.database
       .prepare(
