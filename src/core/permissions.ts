@@ -1,5 +1,3 @@
-import type { PermissionContext } from './permissions.ts';
-
 export interface PermissionContext {
   isAdministrator?: boolean;
   roleIds?: readonly string[];
