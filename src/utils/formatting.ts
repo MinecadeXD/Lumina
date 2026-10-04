@@ -16,10 +16,17 @@ export function formatDiscordResponse(content: string): string {
 
 function normalizeDiscordFormatting(content: string): string {
   return content
-    .replace(/^#{1,6}\s+/gm, '**')
-    .replace(/^(\s*)[*-]\s+/gm, '$1• ')
-    .replace(/\$\$([\s\S]*?)\$\$/g, '$1')
-    .replace(/\$([^$\n]+)\$/g, '$1');
+    .split(/(```[\\s\\S]*?(?:```|$))/g)
+    .map((part) => {
+      if (part.startsWith('```')) return part;
+
+      return part
+        .replace(/^#{1,6}\s+(.+)$/gm, '**$1**')
+        .replace(/^(\s*)[*-]\s+/gm, '$1• ')
+        .replace(/\$\$([\s\S]*?)\$\$/g, '$1')
+        .replace(/\$([^$\n]+)\$/g, '$1');
+    })
+    .join('');
 }
 
 function truncateDiscordResponse(content: string): string {
