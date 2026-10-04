@@ -1,34 +1,40 @@
-import type { SettingsRepository } from '../database/index.ts';
+import type { PermissionContext } from './permissions.ts';
 
 export interface PermissionContext {
   isAdministrator?: boolean;
   roleIds?: readonly string[];
 }
 
+export interface PermissionConfig {
+  guildId: string;
+  aiRoleId?: string;
+  aiChannelId?: string;
+  aiChannelOnly: boolean;
+}
+
 export class PermissionService {
-  public constructor(private readonly settings: SettingsRepository) {}
+  public constructor(private readonly config: PermissionConfig) {}
 
   public canUseAI(
-    userId: string,
+    _userId: string,
     guildId: string | null,
     context: PermissionContext = {},
   ): boolean {
     if (!guildId) return true;
-    const roleId = this.settings.get('guild', guildId, 'ai_role_id')?.value;
-    if (!roleId) return true;
+    if (guildId !== this.config.guildId) return false;
+    if (!this.config.aiRoleId) return true;
     if (context.isAdministrator) return true;
-    return context.roleIds?.includes(roleId) ?? false;
+    return context.roleIds?.includes(this.config.aiRoleId) ?? false;
   }
 
   public isAIChannelAllowed(guildId: string | null, channelId: string): boolean {
     if (!guildId) return true;
-    const only = this.settings.get('guild', guildId, 'ai_channel_only')?.value === 'true';
-    if (!only) return true;
-    const configured = this.settings.get('guild', guildId, 'ai_channel_id')?.value;
-    return configured === channelId;
+    if (guildId !== this.config.guildId) return false;
+    if (!this.config.aiChannelOnly) return true;
+    return this.config.aiChannelId === channelId;
   }
 
   public getAIOnlyChannelEnabled(guildId: string): boolean {
-    return this.settings.get('guild', guildId, 'ai_channel_only')?.value === 'true';
+    return guildId === this.config.guildId && this.config.aiChannelOnly;
   }
 }
